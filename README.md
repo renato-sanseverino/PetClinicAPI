@@ -1,7 +1,7 @@
 # PetClinicAPI
 API de agendamento de consultas veterinárias
 
-## Stack::
+## Stack:
 - Actix Web
 - Sqlx
 - Postgres
