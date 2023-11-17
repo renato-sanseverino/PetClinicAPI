@@ -1,7 +1,9 @@
 # PetClinicAPI
 API em rust para consultório veterinário
 
-# Features:
+![screenshot](assets/banner.png)
+
+## Features:
 - Agendamento de consultas veterinárias
 - Histórico de vacinas e tratamento para os pets
 
