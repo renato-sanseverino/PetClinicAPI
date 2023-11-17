@@ -6,6 +6,7 @@ API em rust para consultório veterinário
 ## Features:
 - Agendamento de consultas veterinárias
 - Histórico de vacinas e tratamento para os pets
+- Pesquisa de satisfação e contatos através de SMS e Whatsapp
 
 ## Stack:
 - Actix Web
