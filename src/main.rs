@@ -5,10 +5,10 @@ mod domain;
 mod repository;
 mod handlers;
 
-// use dotenv::dotenv;
 use handlers::pet;
 use handlers::pet_owner;
 use actix_cors::Cors;
+use actix_web_prometheus::{PrometheusMetrics, PrometheusMetricsBuilder};
 use actix_web::{web, middleware, App, HttpServer};
 // use diesel::prelude::*;                       // diesel ORM
 use sqlx::postgres::{PgPool, PgPoolOptions};     // sqlx
@@ -27,9 +27,12 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         let cors: Cors = Cors::default().allow_any_origin().allow_any_method().allow_any_header();
+        // TODO: adicionar observabilidade/métricas
+        let prometheus: PrometheusMetrics = PrometheusMetricsBuilder::new("api").endpoint("/metrics").build().unwrap();
 
         App::new()
             .wrap(cors)
+            .wrap(prometheus)
             .wrap(middleware::NormalizePath::trim())
             .wrap(middleware::Logger::default())
             .app_data(web::Data::new(pool.clone()))
@@ -46,9 +49,11 @@ async fn main() -> std::io::Result<()> {
                     .service(pet_owner::select)
                     .service(pet_owner::update)
                     .service(pet_owner::delete)
+                    .service(handlers::veterinarian::post_vet)
+                    .service(handlers::veterinarian::receitar_tratamento)
             )
     })
-    .bind(("0.0.0.0", 8080))?
+    .bind(("0.0.0.0", 3000))?
     .run()
     .await
 }

@@ -10,18 +10,26 @@ pub struct VeterinarianRepository {
 }
 
 impl VeterinarianRepository {
-    pub fn new(pool: PgPool) -> Self {
+    pub fn new(pool: &PgPool) -> Self {
         VeterinarianRepository {
-            pool: pool,
+            pool: pool.clone(),
         }
     }
 }
 
 #[async_trait]
 impl Repository<Veterinarian> for VeterinarianRepository {
-    async fn save(&mut self, payload: Veterinarian) -> Result<(), Error> {
-        // TODO: implementar usando sqlx
-        Ok(())
+    async fn insert(&self, payload: Veterinarian) -> Result<Veterinarian, Error> {
+        let inserted = sqlx::query_as!(Veterinarian, "INSERT INTO veterinarian (id, name, \"inscricaoCRMV\")
+        VALUES ($1, $2, $3)
+        RETURNING id, name, \"inscricaoCRMV\" as inscricao_crmv",
+        payload.id,
+        payload.name,
+        payload.inscricao_crmv)
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(inserted)
     }
 
     async fn get_by_id(&self, id: i32) -> Result<Option<Veterinarian>, Error> {
@@ -34,16 +42,16 @@ impl Repository<Veterinarian> for VeterinarianRepository {
         }
     }
 
-    async fn remove(&mut self, id: i32) -> Result<(), Error> {
-        let _query_result = sqlx::query!("DELETE FROM veterinarian WHERE id = $1", id)
+    async fn delete(&self, id: i32) -> Result<u64, Error> {
+        let query_result = sqlx::query!("DELETE FROM veterinarian WHERE id = $1", id)
         .execute(&self.pool)
         .await
         .map_err(Error::from)?;
 
-        Ok(())
+        Ok(query_result.rows_affected())
     }
 
-    async fn patch(&mut self, id: i32, payload: Veterinarian) -> Result<(), Error> {
+    async fn patch(&self, _id: i32, _payload: Veterinarian) -> Result<(), Error> {
         // TODO: implementar usando sqlx
         Ok(())
     }
